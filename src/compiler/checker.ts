@@ -39625,7 +39625,7 @@ export function createTypeChecker(host: TypeCheckerHost): TypeChecker {
             checkConstEnumAccess(node, type);
         }
         currentNode = saveCurrentNode;
-        tracing?.pop();
+        tracing?.pop({typeId: type.id, uninstantiatedTypeId: uninstantiatedType.id});
         return type;
     }
 

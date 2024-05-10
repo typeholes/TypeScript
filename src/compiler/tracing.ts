@@ -44,7 +44,7 @@ export namespace tracingEnabled {
 
     let mode: Mode;
 
-    const typeCatalog: Type[] = []; // NB: id is index + 1
+    const typeCatalog: [number,Type][] = []; // NB: id is index + 1
 
     let legendPath: string | undefined;
     const legend: TraceRecord[] = [];
@@ -125,7 +125,7 @@ export namespace tracingEnabled {
 
     export function recordType(type: Type): void {
         if (mode !== "server") {
-            typeCatalog.push(type);
+            typeCatalog.push([1000*timestamp(),type]);
         }
     }
 
@@ -214,7 +214,7 @@ export namespace tracingEnabled {
         }
     }
 
-    function dumpTypes(types: readonly Type[]) {
+    function dumpTypes(types: readonly [number, Type][]) {
         performance.mark("beginDumpTypes");
 
         const typesPath = legend[legend.length - 1].typesPath!;
@@ -227,7 +227,8 @@ export namespace tracingEnabled {
 
         const numTypes = types.length;
         for (let i = 0; i < numTypes; i++) {
-            const type = types[i];
+            const ts = types[i][0];
+            const type = types[i][1];
             const objectFlags = (type as any).objectFlags;
             const symbol = type.aliasSymbol ?? type.symbol;
 
@@ -332,6 +333,7 @@ export namespace tracingEnabled {
                 firstDeclaration: getLocation(symbol?.declarations?.[0]),
                 flags: Debug.formatTypeFlags(type.flags).split("|"),
                 display,
+                ts,
             };
 
             fs.writeSync(typesFd, JSON.stringify(descriptor));
